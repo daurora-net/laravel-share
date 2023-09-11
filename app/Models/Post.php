@@ -25,4 +25,15 @@ class Post extends Model
  {
   return $this->hasMany(Like::class);
  }
+
+ protected static function boot()
+ {
+     parent::boot();
+
+     // Postが削除される前に、関連するコメントも削除します
+     static::deleting(function ($post) {
+         $post->comments()->delete();
+         $post->likes()->delete();
+     });
+ }
 }

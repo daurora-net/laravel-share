@@ -14,14 +14,22 @@ class PostController extends Controller
    'posts' => $items
   ], 200);
  }
+
  public function store(Request $request)
- {
-  $item = Post::create($request->all());
+{
+  $data = $request->only(['user_id', 'content']);  // user_idとcontentを取得
+
+  // データベースに保存
+  $item = Post::create($data);
+
+  // 新しいポストの詳細を取得
   $post = Post::with(['user', 'comments', 'likes'])->find($item->id);
+
   return response()->json([
-   'post' => $post
+    'post' => $post
   ], 201);
- }
+}
+ 
  public function show(Post $post)
  {
   $item = Post::with(['user', 'comments', 'likes', 'comments.user'])->find($post)->first();
@@ -37,15 +45,14 @@ class PostController extends Controller
  }
  public function destroy(Post $post)
  {
-  $item = Post::where('id', $post->id)->delete();
-  if ($item) {
-   return response()->json([
-    'message' => 'Deleted successfully',
-   ], 200);
-  } else {
-   return response()->json([
-    'message' => 'Not found',
-   ], 404);
-  }
- }
+     if ($post->delete()) {
+         return response()->json([
+             'message' => 'Deleted successfully',
+         ], 200);
+     } else {
+         return response()->json([
+             'message' => 'Not found',
+         ], 404);
+     }
+ } 
 }
